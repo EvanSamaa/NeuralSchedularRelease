@@ -1,0 +1,79 @@
+# Text scenes -> TTS -> turn-taking schedule, without loading a backchannel
+# classifier. The smallest set-up: it needs two reference voices and the
+# scheduler checkpoint only.
+#
+# Not a copy of a research run script: those always loaded a classifier and
+# disabled it with a threshold of 1.0 (see tts_turn_taking.yaml). The scheduler
+# settings are the ones of tts_turn_taking.yaml.
+#
+# With classifier.probability > 0 every turn receives a backchannel with that
+# probability, drawn from classifier.vocab_subset (random backchannels).
+#
+#   python -m neural_scheduler.pipeline.run --config configs/pipeline/tts_no_classifier.yaml
+
+mode: three_pass
+steps: [1, 2, 3]
+
+io:
+  input_jsonl: examples/scenes/plain_turntaking.jsonl
+  out_dir: outputs/plain_turntaking
+
+classifier:
+  type: none
+  probability: 0.0
+  vocab: [yeah, mhm]
+  vocab_subset: [yeah, mhm]
+
+tts:
+  backend: chatterbox
+  ref_s1: /path/to/reference_voice_1.wav          # REQUIRED: your own reference recordings
+  ref_s2: /path/to/reference_voice_2.wav
+  seed: 42
+  device: cuda
+  cfg_weight: 0.5
+  exaggeration: 0.5
+  bc_silence_padding_ms: 5000
+  inter_turn_silence_ms: 200
+  intra_turn_pause_ms: 200
+
+tokenizer:
+  audio_tokenizer_path: THUDM/glm-4-voice-tokenizer
+  model_id: THUDM/glm-4-voice-9b
+  device: cuda
+
+vad:
+  threshold: 0.1
+  min_speech_ms: 50
+  min_silence_ms: 50
+
+scheduler:
+  checkpoint: /path/to/scheduler/checkpoint       # REQUIRED: scheduler checkpoint directory
+  device: cuda
+  output_sr: 22050
+  save_video: true
+  save_input_scripts: true
+  pass1:
+    search_window: 10
+    search_stride: 1
+    scoring_context: 5
+    inter_turn_gap: 6
+    use_speaker_gap_constraints: true
+    speaker_1_min_gap: -10        # negative values allow overlap
+    speaker_1_max_gap: 5
+    speaker_2_min_gap: -10
+    speaker_2_max_gap: 5
+  pass2:
+    search_stride: 1
+    scoring_context: 0
+    bc_position_limit: 0.7
+  pass3:
+    scoring_context: 10
+
+# Optional: how to start each step. Step 1 usually needs its own Python
+# environment (Chatterbox pins different package versions than the rest).
+# environment:
+#   step1:
+#     python: /path/to/tts-env/bin/python        # interpreter for this step
+#     env_setup: "source /path/to/activate_tts_env.sh"   # or a shell snippet run first
+#     env: {NEURAL_SCHEDULER_STUB_TORCHVISION_META: "1"} # only if torchvision breaks the import
+#   step2: {env: {GLM4VOICE_REPO: /path/to/GLM-4-Voice}}

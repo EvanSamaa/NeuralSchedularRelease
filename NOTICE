@@ -1,0 +1,22 @@
+Neural Scheduler
+
+This repository contains code derived from the following projects.
+
+GLM-4-Voice (https://github.com/THUDM/GLM-4-Voice), Apache License 2.0.
+  neural_scheduler/model/modeling.py and configuration.py are modified
+  versions of the GLM-4-Voice ChatGLM model and configuration.
+
+NTPP (https://github.com/Chaos96/NTPP), Apache License 2.0.
+  The dual-channel formulation and the channel-embedding approach follow
+  NTPP; this project started as a fork of that repository.
+
+Full-Duplex-Bench (https://github.com/DanielLin94144/Full-Duplex-Bench),
+CC BY-NC 4.0.
+  neural_scheduler/evaluation/fdb/eval_backchannel.py re-implements the
+  benchmark's backchannel metric computation for this project's output
+  layout. The benchmark code and data are not included.
+
+Models and datasets used by this code (GLM-4-Voice weights, Seamless
+Interaction, Fisher English, RoBERTa, HuBERT, Qwen3-Omni, Chatterbox,
+Silero VAD) are distributed by their owners under their own terms and are
+not included.

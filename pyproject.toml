@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neural-scheduler"
+version = "0.1.0"
+description = "Neural Scheduler: turn-taking and backchannel timing for scripted two-speaker dialogue"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Apache-2.0" }
+dependencies = [
+    "torch>=2.4",
+    "transformers>=4.46,<4.47",
+    "numpy",
+    "safetensors",
+    "soundfile",
+    "pyyaml",
+]
+
+[project.optional-dependencies]
+train = ["datasets", "deepspeed", "flash-attn", "accelerate", "tensorboard", "sentencepiece", "tiktoken"]
+data = ["torchaudio", "librosa", "pandas", "silero-vad", "lmdb", "tiktoken"]
+backchannel = ["scikit-learn", "tensorboard", "matplotlib", "scipy"]
+pipeline = ["torchaudio", "librosa", "matplotlib", "opencv-python", "silero-vad"]
+eval = ["scipy", "matplotlib", "pandas", "statsmodels", "librosa", "silero-vad", "torchaudio"]
+analysis = ["scipy", "matplotlib", "pandas", "statsmodels", "torchaudio", "opencv-python", "librosa"]
+tts = ["chatterbox-tts"]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["neural_scheduler*"]
+
+[tool.setuptools.package-data]
+neural_scheduler = ["evaluation/templates/*.html"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["equivalence: compares against the original NTPP research tree (needs NTPP_ORIG)"]

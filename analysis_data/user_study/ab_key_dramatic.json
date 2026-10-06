@@ -1,0 +1,27 @@
+[
+  {
+    "item": 1,
+    "video_file": "video_01.mp4",
+    "proposed_is_A": true
+  },
+  {
+    "item": 2,
+    "video_file": "video_02.mp4",
+    "proposed_is_A": false
+  },
+  {
+    "item": 3,
+    "video_file": "video_03.mp4",
+    "proposed_is_A": true
+  },
+  {
+    "item": 4,
+    "video_file": "video_04.mp4",
+    "proposed_is_A": true
+  },
+  {
+    "item": 5,
+    "video_file": "video_05.mp4",
+    "proposed_is_A": true
+  }
+]

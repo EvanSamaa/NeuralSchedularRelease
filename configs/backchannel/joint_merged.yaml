@@ -1,0 +1,33 @@
+# Joint text + audio backchannel classifier, three merged classes
+# (NoBackchannel / Acknowledgment / Reactive).
+#
+#   python -m neural_scheduler.backchannel.train \
+#       --config configs/backchannel/joint_merged.yaml \
+#       --train_file <train.jsonl> --val_file <val.jsonl> --output_dir <run_dir>
+#
+# Command-line arguments override the values below.
+
+roberta_name: roberta-base
+hubert_name: facebook/hubert-base-ls960
+max_length: 512
+max_audio_seconds: 15.0
+audio_stride: 4
+
+fusion_layers: 2
+fusion_heads: 8
+fusion_ffn: 3072
+fusion_dropout: 0.1
+head_dropout: 0.1
+
+phase: merged
+epochs: 10
+batch_size: 32
+# One learning rate for RoBERTa, the fusion transformer and the head.
+lr: 2.0e-4
+weight_decay: 0.01
+warmup_ratio: 0.06
+grad_clip: 1.0
+patience: 5
+class_weight_method: sqrt_inv
+seed: 42
+num_workers: 4

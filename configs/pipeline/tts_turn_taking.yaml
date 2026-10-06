@@ -1,0 +1,89 @@
+# Text scenes -> TTS -> turn-taking schedule, no backchannels.
+#
+# Mirrors experiments/inference_qualitative_examples/run_pipeline_standard_run.sh
+# (the run behind the turn-taking listening test). As there, the classifier is
+# loaded and the "bc_never" variant raises its threshold to 1.0. Without a
+# classifier checkpoint, set classifier.type to none and classifier.probability
+# to 0 instead and drop the "variants" line.
+#
+#   python -m neural_scheduler.pipeline.run --config configs/pipeline/tts_turn_taking.yaml
+
+mode: three_pass
+steps: [1, 2, 3]
+variants: [bc_never]            # results go to <io.out_dir>/bc_never
+
+io:
+  input_jsonl: examples/scenes/everyday_scenes.jsonl
+  out_dir: outputs/everyday_scenes/no_bc
+
+classifier:
+  type: joint
+  dir: /path/to/bc_classifier/best_model          # REQUIRED: joint classifier checkpoint
+  tokenizer_dir: /path/to/bc_classifier/tokenizer
+  confidence_threshold: 1.0
+  context_window_turns: 10
+  context_window_future_turns: 5
+  vocab_per_class: examples/bc_vocab/everyday.json
+  vocab: [yeah]
+  probability: 1.0
+
+tts:
+  backend: chatterbox
+  ref_s1: /path/to/reference_voice_1.wav          # REQUIRED: your own reference recordings
+  ref_s2: /path/to/reference_voice_2.wav
+  seed: 42
+  device: cuda
+  cfg_weight: 0.5
+  exaggeration: 0.5
+  bc_silence_padding_ms: 5000
+  inter_turn_silence_ms: 200
+  intra_turn_pause_ms: 200
+  run_naive_only: true            # as in the original run; has no effect for text input
+
+tokenizer:
+  audio_tokenizer_path: THUDM/glm-4-voice-tokenizer
+  model_id: THUDM/glm-4-voice-9b
+  device: cuda
+
+vad:
+  threshold: 0.1
+  min_speech_ms: 50
+  min_silence_ms: 50
+
+scheduler:
+  checkpoint: /path/to/scheduler/checkpoint       # REQUIRED: scheduler checkpoint directory
+  device: cuda
+  output_sr: 22050
+  save_video: true
+  save_input_scripts: true
+  pass1:
+    search_window: 10
+    search_stride: 1
+    scoring_context: 5
+    inter_turn_gap: 6
+    schedule_subturns: false
+    speaker_1_subturn_min_pause: -5
+    speaker_1_subturn_max_pause: 5
+    speaker_2_subturn_min_pause: -5
+    speaker_2_subturn_max_pause: 5
+    subturn_search_stride: 1
+    use_speaker_gap_constraints: true
+    speaker_1_min_gap: -10        # negative values allow overlap
+    speaker_1_max_gap: 5
+    speaker_2_min_gap: -10
+    speaker_2_max_gap: 5
+  pass2:
+    search_stride: 1
+    scoring_context: 0
+    bc_position_limit: 0.7
+  pass3:
+    scoring_context: 10
+
+# Optional: how to start each step. Step 1 usually needs its own Python
+# environment (Chatterbox pins different package versions than the rest).
+# environment:
+#   step1:
+#     python: /path/to/tts-env/bin/python        # interpreter for this step
+#     env_setup: "source /path/to/activate_tts_env.sh"   # or a shell snippet run first
+#     env: {NEURAL_SCHEDULER_STUB_TORCHVISION_META: "1"} # only if torchvision breaks the import
+#   step2: {env: {GLM4VOICE_REPO: /path/to/GLM-4-Voice}}

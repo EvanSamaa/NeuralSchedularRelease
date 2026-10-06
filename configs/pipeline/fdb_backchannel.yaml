@@ -1,0 +1,89 @@
+# Full-Duplex-Bench backchannel task (ICC subset): speaker 1 is the benchmark
+# recording and keeps its timing; only speaker 2's backchannels are predicted,
+# synthesised and scheduled.
+#
+# Mirrors experiments/inference_pipeline_bc_only_full_duplex_bench/
+# run_step1_classifier_with_audio_longer.sh, run_step2_longer.sh and
+# run_step3_longer.sh. The other benchmark runs differ in:
+#   "long"            classifier.vocab_per_class: examples/bc_vocab/benchmark_long.json
+#   "short friendly"  classifier.vocab_per_class: examples/bc_vocab/benchmark_short_friendly.json,
+#                     tts.backend: chatterbox_turbo, scheduler.pass2.bc_position_limit: 0.6
+#   threshold sweep   classifier.confidence_threshold: 0.5 ... 0.9
+#
+# io.input_bc_gt_jsonl is written by the benchmark preparation script
+# (neural_scheduler.evaluation.fdb.prepare_icc); io.icc_base_dir is the prepared
+# dataset folder holding <id>/input.wav.
+#
+#   python -m neural_scheduler.pipeline.run --config configs/pipeline/fdb_backchannel.yaml
+
+mode: bc_only
+steps: [1, 2, 3]
+
+io:
+  input_bc_gt_jsonl: /path/to/icc_backchannel_bc_gt.jsonl     # REQUIRED
+  icc_base_dir: /path/to/icc_backchannel                      # REQUIRED
+  out_dir: outputs/fdb_backchannel
+  tokenized_jsonl: "{out_dir}/tokenized_result.jsonl"
+  output_root: "{out_dir}/inference_output"
+
+classifier:
+  type: joint
+  dir: /path/to/bc_classifier/best_model          # REQUIRED: joint classifier checkpoint
+  tokenizer_dir: /path/to/bc_classifier/tokenizer
+  confidence_threshold: 0.5
+  context_window_turns: 10
+  context_window_future_turns: 5
+  max_audio_seconds: 15.0
+  suppress_consecutive_bcs: false
+  vocab_per_class: examples/bc_vocab/benchmark_longer.json
+  vocab: ["That's Correct, haha"]
+
+tts:
+  backend: chatterbox
+  ref_s1: /path/to/reference_voice_1.wav          # REQUIRED: your own reference recordings
+  ref_s2: /path/to/reference_voice_2.wav          # voice of the backchannels
+  seed: 42
+  device: cuda
+  cfg_weight: 0.5
+  exaggeration: 0.3
+  bc_silence_padding_ms: 5000
+  voice_line_padding_ms: 5000
+  inter_turn_silence_ms: 1000
+  intra_turn_pause_ms: 1000
+
+tokenizer:
+  audio_tokenizer_path: THUDM/glm-4-voice-tokenizer
+  model_id: THUDM/glm-4-voice-9b
+  device: cuda
+
+vad:
+  threshold: 0.2
+  min_speech_ms: 50
+  min_silence_ms: 50
+
+scheduler:
+  checkpoint: /path/to/scheduler/checkpoint       # REQUIRED: scheduler checkpoint directory
+  device: "cuda:0"
+  output_sr: 22050
+  output_sub_dir: segment_search_v2
+  save_video: false
+  pass1:
+    search_window: 10
+    search_stride: 1
+    scoring_context: 10
+    inter_turn_gap: 5
+  pass2:
+    search_stride: 1
+    scoring_context: 0
+    bc_position_limit: 1.0
+    bc_effect: np                 # backchannels never pause the speaker
+    max_bc_overlap_ratio: 0.01
+
+# Optional: how to start each step. Step 1 usually needs its own Python
+# environment (Chatterbox pins different package versions than the rest).
+# environment:
+#   step1:
+#     python: /path/to/tts-env/bin/python        # interpreter for this step
+#     env_setup: "source /path/to/activate_tts_env.sh"   # or a shell snippet run first
+#     env: {NEURAL_SCHEDULER_STUB_TORCHVISION_META: "1"} # only if torchvision breaks the import
+#   step2: {env: {GLM4VOICE_REPO: /path/to/GLM-4-Voice}}

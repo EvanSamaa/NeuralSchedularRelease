@@ -1,0 +1,52 @@
+[
+  {
+    "item": 1,
+    "video_file": "bc_video_01.mp4",
+    "proposed_is_A": true
+  },
+  {
+    "item": 2,
+    "video_file": "bc_video_02.mp4",
+    "proposed_is_A": true
+  },
+  {
+    "item": 3,
+    "video_file": "bc_video_03.mp4",
+    "proposed_is_A": true
+  },
+  {
+    "item": 4,
+    "video_file": "bc_video_04.mp4",
+    "proposed_is_A": true
+  },
+  {
+    "item": 5,
+    "video_file": "bc_video_05.mp4",
+    "proposed_is_A": false
+  },
+  {
+    "item": 6,
+    "video_file": "bc_video_06.mp4",
+    "proposed_is_A": false
+  },
+  {
+    "item": 7,
+    "video_file": "bc_video_07.mp4",
+    "proposed_is_A": false
+  },
+  {
+    "item": 8,
+    "video_file": "bc_video_08.mp4",
+    "proposed_is_A": true
+  },
+  {
+    "item": 9,
+    "video_file": "bc_video_09.mp4",
+    "proposed_is_A": false
+  },
+  {
+    "item": 10,
+    "video_file": "bc_video_10.mp4",
+    "proposed_is_A": true
+  }
+]

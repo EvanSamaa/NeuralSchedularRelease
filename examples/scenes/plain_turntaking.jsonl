@@ -1,0 +1,5 @@
+{"id": "example_0000", "text": "[S1] Is the new model trained yet\n[S2] Yes but the loss is still high\n[S1] Did you check the audio alignment\n[S2] I will look at that now"}
+{"id": "example_0001", "text": "[S1] This espresso tastes very sour\n[S2] Maybe you should grind finer\n[S1] I thought the ratio was fine\n[S2] Try a longer extraction time"}
+{"id": "example_0002", "text": "[S1] Are you going to the park today\n[S2] Only if it stops raining soon\n[S1] I want to practice my kickflips\n[S2] Let us go when it dries up"}
+{"id": "example_0003", "text": "[S1] Did you finish the paper reading\n[S2] Almost but the math is hard\n[S1] We can discuss it before class\n[S2] That sounds like a good plan"}
+{"id": "example_0004", "text": "[S1] What is for dinner tonight\n[S2] I was thinking of making pork\n[S1] Should we get some sweet potatoes\n[S2] Yes that would be great"}

@@ -1,0 +1,97 @@
+# Text scene -> TTS -> classifier-driven backchannels -> schedule.
+#
+# Mirrors experiments/inference_pipeline_10_examples/tts_psychiatrist/
+# run_pipeline_standard_run_with_bc_3_seg.sh: the long final turn is written as
+# three consecutive [S2] turns ("sub-turns") so each can host a backchannel,
+# pauses inserted for a backchannel are half its length ("hp"), and a
+# backchannel must start in the second half of its host turn.
+#
+# That run used the text-only RoBERTa classifier with a uniformly random word
+# choice, which the three classifier settings marked (*) reproduce. For the
+# joint text+audio classifier use type: joint and remove the two lines below it;
+# inference_qualitative_examples/run_pipeline_standard_run_with_bc.sh did so
+# with confidence_threshold 0.2 and bc_position_limit 0.7.
+#
+#   python -m neural_scheduler.pipeline.run --config configs/pipeline/tts_with_backchannel.yaml
+
+mode: three_pass
+steps: [1, 2, 3]
+variants: [classifier]          # results go to <io.out_dir>/classifier
+
+io:
+  input_jsonl: examples/scenes/psychiatrist_3_segments.jsonl
+  out_dir: outputs/psychiatrist/with_bc_3_segments
+
+classifier:
+  type: text                                      # (*)
+  word_selection: random                          # (*)
+  dir: /path/to/bc_classifier/best_model          # REQUIRED: classifier checkpoint
+  tokenizer_dir: /path/to/bc_classifier/tokenizer
+  confidence_threshold: 0.5
+  context_window_turns: 10
+  context_window_future_turns: 5
+  vocab_per_class: examples/bc_vocab/psychiatrist_alt.json
+  vocab: [yeah]
+  probability: 1.0
+
+tts:
+  backend: chatterbox
+  ref_s1: /path/to/reference_voice_1.wav          # REQUIRED: your own reference recordings
+  ref_s2: /path/to/reference_voice_2.wav
+  seed: 46
+  device: cuda
+  cfg_weight: 0.5
+  exaggeration: 0.3
+  bc_silence_padding_ms: 5000
+  inter_turn_silence_ms: 2000
+  intra_turn_pause_ms: 1000
+
+tokenizer:
+  audio_tokenizer_path: THUDM/glm-4-voice-tokenizer
+  model_id: THUDM/glm-4-voice-9b
+  device: cuda
+
+vad:
+  threshold: 0.2
+  min_speech_ms: 100
+  min_silence_ms: 50
+
+scheduler:
+  checkpoint: /path/to/scheduler/checkpoint       # REQUIRED: scheduler checkpoint directory
+  device: cuda
+  output_sr: 22050
+  save_video: true
+  save_input_scripts: true
+  pass1:
+    search_window: 10
+    search_stride: 1
+    scoring_context: 5
+    inter_turn_gap: 6
+    schedule_subturns: false      # true re-times the pauses inside a turn as well
+    speaker_1_subturn_min_pause: 1
+    speaker_1_subturn_max_pause: 5
+    speaker_2_subturn_min_pause: 1
+    speaker_2_subturn_max_pause: 5
+    subturn_search_stride: 1
+    use_speaker_gap_constraints: true
+    speaker_1_min_gap: -2
+    speaker_1_max_gap: 10
+    speaker_2_min_gap: -2
+    speaker_2_max_gap: 10
+  pass2:
+    search_stride: 1
+    scoring_context: 0
+    bc_position_limit: 0.5
+    bc_effect: hp                 # hp: half pause, fp: full pause, np: no pause; join with "+"
+    max_bc_overlap_ratio: 0.05
+  pass3:
+    scoring_context: 10
+
+# Optional: how to start each step. Step 1 usually needs its own Python
+# environment (Chatterbox pins different package versions than the rest).
+# environment:
+#   step1:
+#     python: /path/to/tts-env/bin/python        # interpreter for this step
+#     env_setup: "source /path/to/activate_tts_env.sh"   # or a shell snippet run first
+#     env: {NEURAL_SCHEDULER_STUB_TORCHVISION_META: "1"} # only if torchvision breaks the import
+#   step2: {env: {GLM4VOICE_REPO: /path/to/GLM-4-Voice}}

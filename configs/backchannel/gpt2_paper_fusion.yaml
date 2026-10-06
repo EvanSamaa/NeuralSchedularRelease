@@ -1,0 +1,31 @@
+# GPT-2 + HuBERT late-fusion baseline (Wang et al., ICASSP 2024), binary labels.
+# Run twice: first with --text_only (stage 1), then with
+# --text_model_checkpoint <stage1 run>/best_model (stage 2, opt2).
+#
+#   python -m neural_scheduler.backchannel.train_gpt2_baseline \
+#       --config configs/backchannel/gpt2_paper_fusion.yaml \
+#       --train_file <train.jsonl> --val_file <val.jsonl> --output_dir <run_dir> --text_only
+
+gpt2_name: gpt2
+hubert_name: facebook/hubert-base-ls960
+max_length: 512
+max_audio_seconds: 15.0
+paper_fusion_option: opt2
+paper_audio_proj_dim: 256
+
+phase: binary
+epochs: 10
+batch_size: 32
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.06
+grad_clip: 1.0
+# The reference run used patience 5 for stage 1 and 3 for stage 2 (pass --patience 3).
+patience: 5
+# The reference run combined loss weighting with balanced sampling; the trainer
+# warns that this corrects for class imbalance twice.
+class_weight_method: sqrt_inv
+balanced_sampling: true
+balanced_mode: uniform
+seed: 42
+num_workers: 4

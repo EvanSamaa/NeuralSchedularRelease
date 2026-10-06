@@ -1,0 +1,11 @@
+{
+  "dialogue_id": "bike_shop",
+  "turns": [
+    {"turn_id": 0, "speaker": 1, "text": "Hi, I dropped my bike off for a tune-up on Monday.", "audio_path": "audio/turn0_s1.wav"},
+    {"turn_id": 1, "speaker": 2, "text": "Let me have a look. The blue road bike?", "audio_path": "audio/turn1_s2.wav"},
+    {"turn_id": 2, "speaker": 1, "text": "That's the one.", "audio_path": "audio/turn2_s1.wav"},
+    {"turn_id": 3, "speaker": 2, "text": "It's ready. We replaced the brake pads and trued the back wheel.", "audio_path": "audio/turn3_s2.wav"},
+    {"turn_id": 4, "speaker": 2, "text": "The chain was pretty worn too, so you may want to swap it before the summer.", "audio_path": "audio/turn4_s2.wav"},
+    {"turn_id": 5, "speaker": 1, "text": "Good to know. How much do I owe you?", "audio_path": "audio/turn5_s1.wav"}
+  ]
+}
