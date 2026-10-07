@@ -120,11 +120,22 @@ figures. They are skipped when `NTPP_ORIG` is not set. All tests run on CPU.
 
 ## What is not here
 
-- The scheduler and classifier checkpoints.
+- The scheduler and classifier checkpoints (planned; see [Roadmap](#roadmap)).
 - Fisher (LDC) and Seamless Interaction data or anything derived from them.
 - Full-Duplex-Bench and its data (CC BY-NC 4.0); only an adapter for this
   project's output layout is included.
 - Reference voices and any generated audio or video.
+
+## Roadmap
+
+- [x] Code: model, training, data preprocessing, backchannel classifier,
+      inference pipeline, evaluation and analysis tools
+- [ ] Scheduler checkpoint (GLM-4-Voice fine-tuned on Seamless Interaction)
+- [ ] Backchannel classifier checkpoint
+
+Until the checkpoints are published, the pipeline needs a scheduler
+checkpoint trained with `neural_scheduler.train.train` and, for
+backchannels, a classifier trained with `neural_scheduler.backchannel.train`.
 
 ## Licence and attribution
 
